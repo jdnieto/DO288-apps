@@ -35,14 +35,20 @@ pipeline {
 	stage('wait for approval'){
 	    steps {
 		timeout(time: 60, unit: 'MINUTES') {
-		    input message: "Move to next stage? "
+		    input message: "Do you want to deploy the app? "
 		}
 	    }
 	}
 
         stage('stage 3') {
             steps {
-                sh 'echo hello from stage 3!. This is the last stage...'
+		script {
+			openshift.withCluster(){
+			  openshift.withProject("dmartinrhn-simple-pipeline"){
+	                	openshift.selector("dc", 'myapp').rollout().latest()
+			  }
+			}
+		}
             }
         }
 
